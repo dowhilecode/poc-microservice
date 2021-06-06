@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Past Orders";
+}
+@model IEnumerable<Order>
+
+<h1>Past Orders</h1>
+@if (Model != null)
+{
+    <table class="table table-primary table-responsive-lg table-hover">
+        <thead>
+            <tr>
+                <th>ORN</th>
+                <th>Order Id</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td>@m.OrderReferenceNumber</td>
+                    <td>@m.OrderId</td>
+                    <td>Rs. @m.NetPrice</td>
+                    <td>
+                        @if (m.Status == "PaymentPending")
+                        {
+                            <span>Payment in progress</span>
+                        }
+                        else if (m.Status == "OrderAccepted")
+                        {
+                            <span>Accepted</span>
+                        }
+                        else if (m.Status == "InTransit")
+                        {
+                            <span>InTransit</span>
+                        }
+                        else if (m.Status == "Delivered")
+                        {
+                            <span>Delivered</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="card">
+        <div class="card-text">
+            No order history <a asp-action="Index" asp-controller="ProductCatalog">shop here</a>
+        </div>
+    </div>
+}

@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Payment Action";
+}
+@model IEnumerable<OrderPayment>
+<h1>Payment Action</h1>
+
+@if (Model != null)
+{
+    <table class="table table-primary table-responsive-lg table-hover">
+        <thead>
+            <tr>
+                <th>OrderReference</th>
+                <th>OrderId</th>
+                <th>OrderDate</th>
+                <th>OrderAmount</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td>@m.OrderReferenceNumber</td>
+                    <td>@m.OrderId</td>
+                    <td>@m.OrderDate</td>
+                    <td>Rs. @m.OrderAmount</td>
+                    <td>
+                        <input type="submit" value="Approve" />
+                        <input type="submit" value="Reject" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<script type="text/javascript">
+    $(document).ready(() => {
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: '', // Todo: apply data here
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+
+            },
+            error: function () {
+
+            },
+            complete: function () {
+
+            }
+        })
+    });
+</script>

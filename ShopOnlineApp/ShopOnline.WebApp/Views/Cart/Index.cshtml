@@ -1,0 +1,189 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Order Basket";
+    List<Item> orderItems = Model.Items;
+}
+
+<h1>Basket</h1>
+@if (Model != null && orderItems !=null && orderItems.Count > 0)
+{
+    <div class="row">
+        <div class="col-6">
+            ORN: <span id="lblORN">@Model.OrderReferenceNumber</span>
+        </div>
+        <div class="col-6">
+            Order Date: <span id="lblCreatedDate">@Model.CreatedDate</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            Order ID: <span id="lblOrderId">@Model.OrderId</span>
+        </div>
+        <div class="col-6">
+            User ID: <span id="lblUserId">@Model.UserId</span>
+        </div>
+    </div>
+    if (orderItems != null)
+    {
+        <table class="table table-primary table-responsive-lg table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => orderItems.First().ProductId)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => orderItems.First().ProductName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => orderItems.First().Price)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => orderItems.First().Qty)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in orderItems)
+                {
+                    <tr>
+                        <td>
+                            @Html.ActionLink(item.ProductId, "Detail", "ProductCatalog", new { id = item.ProductId })
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProductName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(modelItem => item.Qty)
+                        </td>
+                        <td>
+                            @*<input type="button" value="Delete" id="btnRemoveProduct" />*@
+                            @Html.Hidden(item.ProductId, item.ProductId, new { id = "delProdId" })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                @Html.LabelFor(m => m.TotalPrice)
+            </div>
+            <div class="col-4">
+                <span id="lblTotalPrice">@Model.TotalPrice</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                Discount Code
+            </div>
+            <div class="col-4">
+                <input type="text" id="txtDiscountCode" maxlength="6" />
+                <input type="button" id="btnDiscountCode" value="Apply" />
+            </div>
+            <div class="col-4">
+                <span id="lblDiscountValue">0</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                @Html.LabelFor(m => m.NetPrice)
+            </div>
+            <div class="col-4">
+                <span id="lblNetPrice">@Model.NetPrice</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+            </div>
+            <div class="col-4">
+                <input type="button" value="Proceed for Payment" id="btnPayment" />
+            </div>
+        </div>
+    }
+}
+else
+{
+<div>
+    you may like to check
+    <a asp-action="Index" asp-controller="Home">past order status</a> or 
+    <a asp-action="Index" asp-controller="ProductCatalog">some more products</a>
+</div>
+}
+<script type="text/javascript">
+    $(document).ready(() => {
+        // GET Discont based on DiscountCode
+        $("#btnDiscountCode").click(function () {
+            let url = 'http://localhost:7002/api/Discount/'
+            let code = $.trim($("#txtDiscountCode").val());
+            console.log('code:', code);
+            $.ajax({
+                url: url + code,
+                type: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                crossDomain: true,
+                success: function (data) {
+                    console.log('discount received:', data);
+                    let totPrice = parseInt($.trim($("#lblTotalPrice").text()));
+                    let discount = parseInt(data.split('-')[1]);
+                    totPrice = totPrice - discount;
+                    $("#lblNetPrice").text(totPrice);
+
+                    $("#txtDiscountCode").toggleClass('success');
+                    $('#lblDiscountValue').text(discount);
+
+                    if (data.split('-')[0] !== 'Valid') {
+                        $("#txtDiscountCode").toggleClass('danger');
+                    }
+                },
+                error: function (err) {
+                    console.log('err:', err);
+                    alert('This code is invalid, try later!');
+                },
+                complete: function () {
+                    console.log('it is completed');
+                }
+            });
+        });
+
+
+        // Send for Payment
+        $("#btnPayment").click(function () {
+            console.info("Proceeding and sending for payment");
+            var orderObject = {};
+            orderObject.OrderReferenceNumber = $('#lblORN').text();
+            orderObject.OrderId = $('#lblOrderId').text();
+            orderObject.UserId = $('#lblUserId').text();
+            orderObject.TotalPrice = parseInt($('#lblTotalPrice').text());
+            orderObject.DiscountApplied = parseInt($('#lblDiscountValue').text());
+            orderObject.NetPrice = parseInt($('#lblNetPrice').text());
+            orderObject.CreatedDate = new Date();
+            orderObject.Items = [];
+            orderObject.Status = 'Pending';
+            console.log('order object:', orderObject, JSON.stringify(orderObject));
+            $.ajax({
+                url: 'http://localhost:7000/Cart/PlaceOrder',       // 32780
+                type: 'POST',
+                data: JSON.stringify(orderObject),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                async: true,
+                success: function (data) {
+
+                },
+                error: function (data) {
+
+                },
+                complete: function () {
+
+                }
+            });
+        });
+    });
+</script>

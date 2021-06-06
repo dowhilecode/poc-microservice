@@ -1,0 +1,78 @@
+﻿
+@{
+    ViewData["Title"] = "Product List";
+}
+
+@model IEnumerable<Product>
+
+
+@Html.AntiForgeryToken()
+<h1>Product List</h1>
+@Html.ActionLink("My Order Basket", "CheckOut", "ProductCatalog")
+@if (Model != null)
+{
+<table class="table table-primary table-responsive-lg table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Category</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>MRP</th>
+            <th>Available</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@Html.ActionLink(m.ProductId, "Detail", "ProductCatalog", new { id = m.ProductId })</td>
+                <td>@m.Category</td>
+                <td>@m.Name</td>
+                <td>@m.Description</td>
+                <td>Rs. @m.MRP</td>
+                @if (m.InStock == true)
+                {
+                    <td>Yes</td>
+                    <td>
+                        <input type="button" value="Buy" class="btn btn-block buynow" />
+                        @Html.Hidden(m.ProductId, m.ProductId)
+                    </td>
+                }
+                else
+                {
+                    <td>No</td>
+                }
+
+            </tr>
+        }
+    </tbody>
+</table>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.buynow').click(function (e) {
+            console.log($(e.target).siblings(0), $(e.target).siblings(0).attr("id"));
+            var prodID = $(e.target).siblings(0).val();
+            console.log('selected product id: ', prodID);
+            $.ajax({
+                url: 'http://localhost:7000/ProductCatalog/AddToOrder', //32780
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                crossDomain: true,
+                data: JSON.stringify(prodID),
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (err) {
+                    console.log('err in product', err);
+                },
+                complete: function () {
+                    //alert('Order added to cart=');
+                }
+            });
+        });
+    });
+</script>

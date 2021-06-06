@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Use this page to detail your site's privacy policy.</p>
+
+<input type="text" id="txtDiscountCode" />
+<input type="button" id="btnDiscountCode" value="Apply Discount" />
+<input type="button" id="btnProduct" value="Get Products" />
+
+<script type="text/javascript">
+    $(document).ready(() => {
+        // GET Discont based on DiscountCode
+        $("#btnDiscountCode").click(function () {
+            let url = 'http://localhost:7002/api/Discount/';
+            let code = $.trim($("#txtDiscountCode").val());
+            console.log('code:', code);
+            $.ajax({
+                url: url + code,
+                type: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                crossDomain: true,
+                success: function (data) {
+                    console.log('discount received:', data);
+                },
+                error: function (err) {
+                    console.log('err:', err);
+                    alert('This code is invalid, try later!');
+                },
+                complete: function () {
+                    console.log('it is completed');
+                }
+            });
+        });
+
+        $("#btnProduct").click(function () {
+            let url = 'http://localhost:7001/api/product/all'; 
+            $.ajax({
+                url: url,
+                type: 'GET',
+                contentType: 'application/json;charset=utf-8',
+                crossDomain: true,
+                success: function (data) {
+                    console.log('data received:', data);
+                },
+                error: function (err) {
+                    console.log('err:', err);
+                    alert('This code is invalid, try later!');
+                },
+                complete: function () {
+                    console.log('it is completed');
+                }
+            });
+        });
+    });
+</script>

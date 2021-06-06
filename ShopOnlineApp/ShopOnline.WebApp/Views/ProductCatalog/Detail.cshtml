@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewData["Title"] = "Product Detail";
+}
+@model Product
+<h1>Product Detail</h1>
+
+@Html.AntiForgeryToken()
+@if (Model != null)
+{
+        <table class="table table-primary table-responsive-lg table-hover">
+            <tbody>
+                <tr>
+                    <td>Category</td>
+                    <td>@Model.Category</td>
+                    <td>Product</td>
+                    <td>@Model.Name</td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td colspan="3">@Model.Description</td>
+                </tr>
+                <tr>
+                    <td>Price</td>
+                    <td>Rs. @Model.MRP</td>
+                    <td>Available now</td>
+                    <td>@Model.InStock</td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <input type="button" value="Buy" class="btn btn-block buynow" />
+                        @Html.Hidden(Model.ProductId, Model.ProductId)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.buynow').click(function (e) {
+            console.log($(e.target).siblings(0), $(e.target).siblings(0).attr("id"));
+            var prodID = $(e.target).siblings(0).val();
+            console.log('selected product id: ', prodID);
+            $.ajax({
+                url: 'http://localhost:7000/ProductCatalog/AddToOrder',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                data: JSON.stringify(prodID),
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (err) {
+                    console.log('err in product',err);
+                },
+                complete: function () {
+                    //alert('Order added to cart=');
+                }
+            });
+        });
+    });
+</script>
